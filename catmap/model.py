@@ -471,7 +471,7 @@ class ReactionModel:
 
                       * pt - the current point in descriptor space
                       * priority - defaults to 0
-                      
+
                       In addition, the template may contain other variables
                       which can be passed in as keyword arguments. The following
                       are special arguments:
@@ -578,10 +578,10 @@ class ReactionModel:
         """
         Convert elementary reaction strings into structured elementary reaction lists.
 
-        :param equations: List of reaction equation strings. 
+        :param equations: List of reaction equation strings.
                           For non-activated reactions (e.g. no activation barrier) the strings
                           should follow a syntax like:
-                          
+
                           * A_s + B_q <-> C_s + D_q
                           * A_s + B_q -> C_s + D_q
 
@@ -753,7 +753,7 @@ class ReactionModel:
         tex_ads = tex_ads.replace('}_{','')
         return tex_ads
 
-    def print_rxn(self,rxn,mode='latex',include_TS=True,print_out = False): 
+    def print_rxn(self,rxn,mode='latex',include_TS=True,print_out = False):
         """
         Print a structured elementary step and print it as plain text or latex.
 
@@ -767,7 +767,7 @@ class ReactionModel:
 
         :param include_TS: Include the transition-state in the output. Optional parameter, default is True.
         :type include_TS:bool
-        
+
         :param print_out: Print the reaction to stdout. Optional parameter, default is False.
         :type print_out:bool
 
@@ -1036,6 +1036,7 @@ class ReactionModel:
             if composition(IS) == composition(TS) == composition(FS):
                 pass
             else:
+                print('Compositions:',composition(IS),composition(TS), composition(FS))
                 raise ValueError('Mass balance is not satisfied for ' + \
                         self.print_rxn(rxn,mode='text'))
             if composition(IS,'sites') == composition(TS,'sites') == \
@@ -1076,7 +1077,7 @@ class ReactionModel:
                                 gas_species.append(species)
                         if len(gas_species) != 1:
                             raise ValueError('Prefactor of type non-activated can ' + \
-                                'only handle exactly one gas phase species per reaction') 
+                                'only handle exactly one gas phase species per reaction')
                         species_name = gas_species[0].split('_')[0]
                         symbols = string2symbols(species_name)
                         m = sum([atomic_masses[atomic_numbers[symbol]]
@@ -1121,7 +1122,7 @@ class ReactionModel:
         Create a string which acts as a header for the log file. The header string
         ensures that the logfile can be opened interactively by Python by importing
         necessary libraries and automatically reading in the data_file.
-        
+
         :param exclude_outputs: Attribute names of ReactionModel to exclude in the log file.
                                 Optional parameter, default is [].
         :type exclude_outputs: [str]
@@ -1404,7 +1405,7 @@ class ReactionModel:
         """
         Reverse the reaction provided. [[IS],[TS],[FS]] -> [[FS],[TS],[IS]]
 
-        :param rxn: Reaction in CatMAP form: 
+        :param rxn: Reaction in CatMAP form:
 
                     * [[IS],[TS],[FS]] for activated reaction
                     * [[IS],[FS]] for non-activated reaction
@@ -1426,7 +1427,7 @@ class ReactionModel:
         """
         Calculate reaction energy given the energies of all species.
 
-        :param rxn: Reaction in CatMAP form: 
+        :param rxn: Reaction in CatMAP form:
 
                     * [[IS],[TS],[FS]] for activated reaction
                     * [[IS],[FS]] for non-activated reaction

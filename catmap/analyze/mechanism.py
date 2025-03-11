@@ -8,9 +8,10 @@ except ImportError:
     print('Warning! graphviz not imported.')
 from itertools import chain, product
 import sys
-import imp
+import importlib
 try:
-    imp.find_module('tabulate')
+    importlib.util.find_spec('tabulate')
+#    imp.find_module('tabulate')
     found_tabulate = True
 except ImportError:
     found_tabulate = False
@@ -62,7 +63,7 @@ class MechanismAnalysis(MechanismPlot,ReactionModelWrapper,MapPlot):
         :type mechanisms: {string:[int]}
 
         :method:        0: only plot FED
-                        1: only print FED 
+                        1: only print FED
                         2: plot and print FED
 
         :param labels: Labels for each state.  Can be generated automatically
@@ -120,7 +121,7 @@ class MechanismAnalysis(MechanismPlot,ReactionModelWrapper,MapPlot):
                     elif self.energy_type == 'entropy':
                         energy_dict = self.scaler.get_entropies(xy)
                         for k in energy_dict.keys():
-                            energy_dict[k] *= self.temperature 
+                            energy_dict[k] *= self.temperature
 
                     elif self.energy_type == 'interacting_energy':
 
@@ -177,7 +178,7 @@ class MechanismAnalysis(MechanismPlot,ReactionModelWrapper,MapPlot):
                                                                             float(cvg))
                         if valid == False:
                             raise UserWarning('No coverages found for '+str(xy)+' in map')
-                    
+
                     for sp in energy_dict:
                         if '_g' in sp and sp not in gas_energies:
                             gas_energies[sp]=energy_dict[sp]
@@ -283,7 +284,7 @@ class MechanismAnalysis(MechanismPlot,ReactionModelWrapper,MapPlot):
                     kwargs = self.kwarg_list[n]
                     for key in kwargs:
                         setattr(self,key,kwargs[key])
-                    
+
                     self.initial_energy += self.line_offset
                     if method!=1:
                         self.draw(ax)
@@ -355,7 +356,7 @@ class MechanismAnalysis(MechanismPlot,ReactionModelWrapper,MapPlot):
 #        elif self.energy_type == 'enthalpy':
 #                    ax.set_ylabel('$\Delta H$ [eV]')
 #        elif self.energy_type == 'entropy':
-#                    ax.set_ylabel('$T\Delta S$ [eV]')            
+#                    ax.set_ylabel('$T\Delta S$ [eV]')
 #        if self.energy_type == 'interacting_energy':
 #            ax.set_ylabel('$\Delta G_{interacting}$ [eV]')
 #        fig.subplots_adjust(**self.subplots_adjust_kwargs)
@@ -394,7 +395,7 @@ class MechanismAnalysis(MechanismPlot,ReactionModelWrapper,MapPlot):
         Creates a directed acyclic graph corresponding
         to the reaction nework.  Leaves out the surface
         states.
-        
+
         :param mechanism: mechanism to select for the graph
 
         :param filename: filename for output
@@ -406,7 +407,7 @@ class MechanismAnalysis(MechanismPlot,ReactionModelWrapper,MapPlot):
                            transition states from graph
         """
         if mechanism is not None:
-            el_rxns = [self.elementary_rxns[i] for i in 
+            el_rxns = [self.elementary_rxns[i] for i in
                        set(self.rxn_mechanisms.get(mechanism))]
         else:
             el_rxns = self.elementary_rxns

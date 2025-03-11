@@ -9,44 +9,44 @@ string2symbols = catmap.string2symbols
 
 class ScalerBase(ReactionModelWrapper):
     def __init__(self,reaction_model = None):
-        """Class for `scaling' descriptors to free energies of reaction and 
-        activation (or other parameters). This class acts as a base class 
-        to be inherited by other scaler classes, but is not 
-        functional on its own. 
+        """Class for `scaling' descriptors to free energies of reaction and
+        activation (or other parameters). This class acts as a base class
+        to be inherited by other scaler classes, but is not
+        functional on its own.
 
-        This class contains the description of the microkinetic model 
-        (adsorbate_names, gas_names, etc.) along with the temperature and 
-        gas_pressures. In most cases these will automatically be populated 
-        by the parent reaction_model class. 
+        This class contains the description of the microkinetic model
+        (adsorbate_names, gas_names, etc.) along with the temperature and
+        gas_pressures. In most cases these will automatically be populated
+        by the parent reaction_model class.
         The scaler-specific attributes are:
 
-        gas_energies: defines the energies of the gas-phase species. 
+        gas_energies: defines the energies of the gas-phase species.
             This sets the references for the system.
-        gas_thermo_mode: the mode for obtaining thermal contributions in 
+        gas_thermo_mode: the mode for obtaining thermal contributions in
             the gas phase. Default is to use the ideal gas approxmation.
-        adsorbate_thermo_mode: the mode for obtaining thermal contributions 
-            from adsorbed species. Default is to use the harmonic 
+        adsorbate_thermo_mode: the mode for obtaining thermal contributions
+            from adsorbed species. Default is to use the harmonic
             adsorbate approximation.
-        frequency_dict: a dictionary of vibrational frequencies (in eV) for 
-            each gas/adsorbate. Should be of the form 
-            frequency_dict[ads] = [freq1, freq2,...]. Needed for ideal gas, 
+        frequency_dict: a dictionary of vibrational frequencies (in eV) for
+            each gas/adsorbate. Should be of the form
+            frequency_dict[ads] = [freq1, freq2,...]. Needed for ideal gas,
             harmonic adsorbate, or hindered adsorbate approximations.
 
         A functional derived scaler class must also contain the methods:
 
-        get_electronic_energies(descriptors): a function to `scale' the 
-            descriptors to electronic energies. Returns a dictionary of 
+        get_electronic_energies(descriptors): a function to `scale' the
+            descriptors to electronic energies. Returns a dictionary of
             the electronic energies of each species in the model.
-        get_energetics(descriptors): a function to obtain the reaction 
-            energetics from the descriptors. Should return a list of 
-            length N (number of elementary reactions): 
+        get_energetics(descriptors): a function to obtain the reaction
+            energetics from the descriptors. Should return a list of
+            length N (number of elementary reactions):
             [[E_rxn1,E_a1],[E_rxn2,E_a2],...[E_rxnN,E_aN]]
-        get_rxn_parameters(descriptors): a function to obtain all necessary 
-            reaction parameters from the descriptors. Should return a list of 
-            length N (number of elementary reactions): 
-            [[param1_rxn1,param2_rxn1...]...[param1_rxnN,param2_rxnN...]]. 
-            For a simple model this could be the same as get_energetics, 
-            but models accounting for interactions may require more 
+        get_rxn_parameters(descriptors): a function to obtain all necessary
+            reaction parameters from the descriptors. Should return a list of
+            length N (number of elementary reactions):
+            [[param1_rxn1,param2_rxn1...]...[param1_rxnN,param2_rxnN...]].
+            For a simple model this could be the same as get_energetics,
+            but models accounting for interactions may require more
             parameters which can be scaled.
         """
         if reaction_model is None:
@@ -77,7 +77,7 @@ class ScalerBase(ReactionModelWrapper):
 
         if 'electronic_energy' in self.output_variables:
             electronic_energy_dict = self.get_electronic_energies(descriptors)
-            self._electronic_energy = [electronic_energy_dict[a] 
+            self._electronic_energy = [electronic_energy_dict[a]
                     for a in ads]
             self.output_labels['electronic_energy'] = ads
 
@@ -140,30 +140,33 @@ class ScalerBase(ReactionModelWrapper):
         thermodynamic_energy_dict = self.get_thermodynamic_energies(
                 descriptors=descriptors,**kwargs)
         free_energy_dict = {}
+#        print(electronic_energy_dict['CO_a'])
         for key in electronic_energy_dict:
             if key in thermodynamic_energy_dict:
                 E_DFT = electronic_energy_dict[key]
                 G = thermodynamic_energy_dict[key]
                 if G is None:
+                    print(electronic_energy_dict)
                     raise ValueError('No free energy for '+key)
                 elif E_DFT is None:
+                    print(electronic_energy_dict)
                     raise ValueError('No formation energy for '+key)
                 free_energy_dict[key] =  E_DFT + G
-        self._gas_energies = [free_energy_dict[g] for g in self.gas_names] 
-        self._site_energies = [free_energy_dict.get(s,0) for s in self.site_names] 
+        self._gas_energies = [free_energy_dict[g] for g in self.gas_names]
+        self._site_energies = [free_energy_dict.get(s,0) for s in self.site_names]
         return free_energy_dict
-    
+
     def get_enthalpies(self,descriptors,**kwargs):
         self.get_free_energies(descriptors,**kwargs)
         return self._enthalpy_dict.copy()
-    
+
     def get_total_enthalpies(self,descriptors,**kwargs):
         self.get_free_energies(descriptors,**kwargs)
         energy_dict = self._enthalpy_dict.copy()
         for _ in list(energy_dict.keys()):
             energy_dict[_] += self._electronic_energy_dict[_]
         return energy_dict
-    
+
     def get_entropies(self,descriptors,**kwargs):
         self.get_free_energies(descriptors,**kwargs)
         return self._entropy_dict.copy()

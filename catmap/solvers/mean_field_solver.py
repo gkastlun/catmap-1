@@ -103,7 +103,7 @@ class MeanFieldSolver(SolverBase):
         tofs = self.get_turnover_frequency(rxn_parameters)
         if weights is None:
             weights = [1]*len(tofs) #use for weighted selectivity (e.g. % carbon)
-            
+
         if self.products is None:
             self.products = [g for g,r in zip(self.gas_names,tofs) if r >0]
         if self.reactants is None:
@@ -194,7 +194,7 @@ class MeanFieldSolver(SolverBase):
             resid = resid.replace(')','')
             resid.strip()
             self.log('jacobian_fail',resid=resid)
-            dRdG = np.zeros((len(self.gas_names),len(self.adsorbate_names+self.transition_state_names)))
+            dSdG = np.zeros((len(self.gas_names),len(self.adsorbate_names+self.transition_state_names)),dtype=object)
 
         s0 = self.get_selectivity(rxn_parameters)
         dSdG *= -kT
@@ -236,7 +236,7 @@ class MeanFieldSolver(SolverBase):
                 dP = (new_p[i] - current_Ps[i])/current_Ps[i]
                 DRC_i.append(float(dTOF/dP))
             DRC.append(DRC_i)
-        self.gas_pressures = current_Ps 
+        self.gas_pressures = current_Ps
         self._rxn_order = DRC
         return DRC
 

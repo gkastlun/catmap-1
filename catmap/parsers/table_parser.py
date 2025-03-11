@@ -8,28 +8,28 @@ class TableParser(ParserBase):
     """Parses attributes based on column headers and filters.
 
     Additional functionality may be added by inheriting and defining
-        the parse_{header_name} function where header_name is the 
+        the parse_{header_name} function where header_name is the
         column header for the additional variable to be parsed.
     """
     def __init__(self,reaction_model=None,**kwargs):
         ParserBase.__init__(self,reaction_model)
         defaults = dict(
-                estimate_frequencies = 1, #Use frequencies from different sites 
-                #if available (set variable to 1 or True). 
+                estimate_frequencies = 1, #Use frequencies from different sites
+                #if available (set variable to 1 or True).
                 #Use dissociated state frequencies for TS (set to 2)
-                #If no frequencies are available from other sites then 
-                #concatenate frequencies from 
+                #If no frequencies are available from other sites then
+                #concatenate frequencies from
                 #individual atoms (set to 3).
                 #If no frequencies can be found, use empty frequency set
                 #(set to >3)
-                frequency_surface_names = [], #Use frequencies from a specific 
-                #surface_name only. If "None" or empty then an average of 
+                frequency_surface_names = [], #Use frequencies from a specific
+                #surface_name only. If "None" or empty then an average of
                 #the frequencies from all available surfaces will be used.
                 required_headers = ['species_name','surface_name','site_name'
                                     ,'formation_energy','frequencies',
                                     'reference'],
                 parse_headers = ['formation_energy','frequencies'], #,'sigma_params'],
-                frequency_unit_conversion = 1.239842e-4, # conversion factor to 
+                frequency_unit_conversion = 1.239842e-4, # conversion factor to
                 coverage_headers = ['coverage','coadsorbate_coverage'],
                 #go from input units to eV
                 standard_coverage = 'min',
@@ -56,7 +56,7 @@ class TableParser(ParserBase):
         lines = f.read().split(self._linebreak)
         lines = [L for L in lines if L]
         f.close()
-        
+
         self._baseparse()
 
 
@@ -69,7 +69,7 @@ class TableParser(ParserBase):
         linedicts = []
         for L in lines:
             linedict = {}
-            for k, v in zip(headers, 
+            for k, v in zip(headers,
                     L.split(self._separator, len(headers))):
                 linedict[k] = v
             if len(linedict) != len(headers):
@@ -86,7 +86,7 @@ class TableParser(ParserBase):
             #print('%'*15)
             sites = [s for s in self.species_definitions if
                     self.species_definitions[s].get('type',None) == 'site' and
-                    linedict['site_name'] in 
+                    linedict['site_name'] in
                     self.species_definitions[s]['site_names']
                     and '*' not in s]
             if not sites:
@@ -109,7 +109,7 @@ class TableParser(ParserBase):
         "Parse in basic info for reaction model"
 
         self.__dict__.update(kwargs)
-       
+
         all_ads = [k for k in list(self.species_definitions.keys())
                    if self.species_definitions[k].get('type',None) != 'site']
 
@@ -133,13 +133,13 @@ class TableParser(ParserBase):
                 infodict = {}
                 for linedict in self._line_dicts:
                     if (
-                            linedict['species_name'] in adsnames and 
-                            linedict['site_name'] in sites and 
+                            linedict['species_name'] in adsnames and
+                            linedict['site_name'] in sites and
                             linedict['surface_name'] in list(self.surface_names)+['None']
                             ):
-                        
+
                         #The following clause ensures that the low-coverage limit
-                        #is used unless otherwise specified. 
+                        #is used unless otherwise specified.
                         #It should probably be abstracted out into something cleaner.
                         pass_dict = {}
                         surf = linedict['surface_name']
@@ -157,7 +157,7 @@ class TableParser(ParserBase):
 
                         if False not in list(pass_dict.values()):
                             infodict[surf] = linedict
-                
+
                 paramlist = []
                 sources = []
                 if self.species_definitions[adsdef]['type'] not in ['gas']:
@@ -184,7 +184,7 @@ class TableParser(ParserBase):
         parabolic dependence of adsorbate free energy on surface charge density
         """
         self.__dict__.update(kwargs)
-       
+
         all_ads = [k for k in self.species_definitions.keys()
                    if self.species_definitions[k].get('type',None) != 'site']
 
@@ -208,13 +208,13 @@ class TableParser(ParserBase):
                 infodict = {}
                 for linedict in self._line_dicts:
                     if (
-                            linedict['species_name'] in adsnames and 
-                            linedict['site_name'] in sites and 
+                            linedict['species_name'] in adsnames and
+                            linedict['site_name'] in sites and
                             linedict['surface_name'] in list(self.surface_names)+['None']
                             ):
-                        
+
                         #The following clause ensures that the low-coverage limit
-                        #is used unless otherwise specified. 
+                        #is used unless otherwise specified.
                         #It should probably be abstracted out into something cleaner.
                         pass_dict = {}
                         surf = linedict['surface_name']
@@ -232,7 +232,7 @@ class TableParser(ParserBase):
 
                         if False not in pass_dict.values():
                             infodict[surf] = linedict #map(float,linedict.strip('[').strip(']').split(','))
-                
+
                 #format sigma_params
                 for surf in infodict:
                     if infodict[surf]['sigma_params']!='[]':
@@ -274,11 +274,11 @@ class TableParser(ParserBase):
                 freqs = [self.frequency_unit_conversion*f for f in freqs]
                 if linedict['species_name'] not in allfreqdict:
                     allfreqdict[linedict['species_name']] = \
-                        [[linedict['surface_name'], 
+                        [[linedict['surface_name'],
                          linedict['site_name'],
                          freqs]] #Store frequency info for parsing later
                 else:
-                    frq = [linedict['surface_name'], 
+                    frq = [linedict['surface_name'],
                          linedict['site_name'],
                          freqs]
                     if frq not in allfreqdict[linedict['species_name']]:
@@ -315,7 +315,7 @@ class TableParser(ParserBase):
                 elif masked[0] and site not in self._gas_sites: #Surface matches but site might not...
                     if entry[1] != 'gas': #HACK... this whole function needs to be cleaned up.
                         partial_matches.append(masked[-1])
-            
+
             def match_handler(perfect_matches):
                 if len(perfect_matches) == 1:
                     return perfect_matches[0]
@@ -328,7 +328,7 @@ class TableParser(ParserBase):
                     return list(freqout)
                 else: #No valid frequencies are found...
                     return []
-            
+
             if len(perfect_matches) > 0:
                 return match_handler(perfect_matches)
             elif self.estimate_frequencies:
@@ -339,6 +339,10 @@ class TableParser(ParserBase):
         for k in list(self.species_definitions.keys()):
             if 'type' not in self.species_definitions[k]:
                 print(('no key type of self.species_definitions[k] for species {}'.format(self.species_definitions[k])))
+#        print(self.species_definitions.keys())
+        for k in list(self.species_definitions.keys()):
+                      print(k,self.species_definitions[k])
+                      print(self.species_definitions[k]['type'])
         all_ads = [k for k in list(self.species_definitions.keys())
                    if self.species_definitions[k]['type'] != 'site']
 
@@ -355,12 +359,12 @@ class TableParser(ParserBase):
             elif self.estimate_frequencies > 3:
                 frequency_dict[adsdef] = []
         for adsdef in all_ads:
-            adsname,site = [self.species_definitions[adsdef][k] 
+            adsname,site = [self.species_definitions[adsdef][k]
                     for k in ['name','site']]
             #Use single-atom frequencies...
             if (
-                    not frequency_dict.get(adsdef,None) and 
-                    self.estimate_frequencies > 2 and 
+                    not frequency_dict.get(adsdef,None) and
+                    self.estimate_frequencies > 2 and
                     '-' not in adsname #Don't include TS's
                     ):
                 symbols = string2symbols(adsname)
@@ -372,7 +376,7 @@ class TableParser(ParserBase):
 
         for adsdef in all_ads:
             #Use dissosciated TS frequencies
-            adsname,site = [self.species_definitions[adsdef][k] 
+            adsname,site = [self.species_definitions[adsdef][k]
                     for k in ['name','site']]
             if (
                     not frequency_dict.get(adsdef,None) and
@@ -387,7 +391,7 @@ class TableParser(ParserBase):
 
     def parse_coverage(self,**kwargs):
         self.__dict__.update(kwargs)
-        
+
         n = len(self.adsorbate_names)
         surfaces = self.surface_names
 
@@ -410,7 +414,7 @@ class TableParser(ParserBase):
                         idx_i = ads_names.index(ads)
                         theta_i = float(linedict['coverage'])
                         theta_vec[idx_i] += theta_i
-                        for coads_name in ['coadsorbate','coadsorbate2']: 
+                        for coads_name in ['coadsorbate','coadsorbate2']:
                             #could add coadsorbate3, coadsorbate4,... as needed
                             if coads_name+'_name' in linedict:
                                 if linedict[coads_name+'_name'] != 'None':
@@ -447,7 +451,7 @@ class TableParser(ParserBase):
                         else:
                             cvg_dict[ads] = [theta_E]
             info_dict[surf] = cvg_dict
-        
+
         for i_ads,ads in enumerate(self.adsorbate_names+self.transition_state_names):
             cvg_dep_E = [None]*len(surfaces)
             for surf in surfaces:

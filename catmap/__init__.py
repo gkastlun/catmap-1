@@ -34,9 +34,13 @@ from scipy.interpolate import griddata as sp_griddata
 
 def griddata(*args, **kwargs):
     """Wrapper function to avoid annoying griddata errors"""
+    print(*args)
+    print(**kwargs)
+    ddd
     try:
         return sp_griddata(*args, **kwargs)
     except RuntimeError:
+        print('try failed')
         kwargs['interp'] = 'linear'
         return sp_griddata(*args, **kwargs)
 
